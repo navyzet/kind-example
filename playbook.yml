@@ -1,0 +1,43 @@
+- hosts: all
+  become: True
+  roles:
+    - geerlingguy.docker
+    - kind
+    - kubectl
+    - helm3
+
+  tasks:
+
+    - name: Check kind cluster
+      shell: 'kind get clusters | grep kind'
+      register: cluster_status
+      ignore_errors: True
+
+    - name: Deploy kind cluster
+      shell: kind create cluster --config /root/kind-config.yaml
+      when: cluster_status.failed
+
+    - name: Create namespace
+      community.kubernetes.k8s:
+        name: testing
+        api_version: v1
+        kind: Namespace
+        state: present
+
+    # From repository
+    - name: Add bitnami chart repo
+      community.kubernetes.helm_repository:
+        name: 'bitnami'
+        repo_url: "https://charts.bitnami.com/bitnami"
+
+    - name: Deploy nginx helmchart
+      community.kubernetes.helm:
+        name: 'mynginx'
+        chart_ref: 'bitnami/nginx'
+        release_namespace: 'testing'
+        values:
+          service:
+            type: 'NodePort'
+            nodePorts:
+              http: "30080"
+              https: "30443"

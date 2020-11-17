@@ -1,0 +1,11 @@
+- name: "download helm"
+  unarchive:
+    src: 'https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz'
+    dest: '/opt/'
+    remote_src: True
+
+- name: Create link to helm
+  file:
+    src: '/opt/linux-amd64/helm'
+    dest: '/usr/local/bin/helm'
+    state: link

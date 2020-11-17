@@ -1,0 +1,15 @@
+- name: download
+  become: yes
+  become_user: root
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+    dest: '/usr/local/bin/kubectl'
+    mode: 0755
+
+- name: "Install pip3"
+  apt:
+    name: python3-pip
+
+- name: "Install python openshift library"
+  pip:
+    name: openshift
